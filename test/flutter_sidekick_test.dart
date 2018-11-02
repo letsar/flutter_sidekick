@@ -90,11 +90,23 @@ class Item {
 }
 
 class SidekickTeamBuilderExample extends StatelessWidget {
+  SidekickTeamBuilderExample(
+    this.teamKey, [
+    List<Item> sourceList,
+    List<Item> targetList,
+  ])  : sourceList = sourceList ?? List.generate(4, (i) => Item(i)),
+        targetList = targetList ?? List.generate(4, (i) => Item(i + 4));
+  final List<Item> sourceList;
+  final List<Item> targetList;
+  final Key teamKey;
+
   @override
   Widget build(BuildContext context) {
     return SidekickTeamBuilder<Item>(
+      key: teamKey,
       animationDuration: Duration(milliseconds: 1000),
-      initialSourceList: List.generate(8, (i) => Item(i)),
+      initialSourceList: sourceList,
+      initialTargetList: targetList,
       builder: (context, sourceBuilderDelegates, targetBuilderDelegates) {
         return ListView(
           children: <Widget>[
@@ -203,155 +215,239 @@ class SidekickTeamBuilderExample extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Sidekick animate to target', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: SimpleExample()));
+  group('Sidekick', () {
+    testWidgets('Animate to target', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SimpleExample()));
 
-    // the initial setup.
-    expect(find.byKey(simpleSource), isInCard);
-    expect(find.byKey(simpleTarget), isInCard);
+      // the initial setup.
+      expect(find.byKey(simpleSource), isInCard);
+      expect(find.byKey(simpleTarget), isInCard);
 
-    await tester.tap(find.byKey(simpleSource));
-    await tester.pump(); // the animation will start at the next frame.
-    await tester.pump(frameDuration);
+      await tester.tap(find.byKey(simpleSource));
+      await tester.pump(); // the animation will start at the next frame.
+      await tester.pump(frameDuration);
 
-    // at this stage, the sidekick just gone on its journey, we are
-    // seeing them at t=16ms.
+      // at this stage, the sidekick just gone on its journey, we are
+      // seeing them at t=16ms.
 
-    expect(find.byKey(simpleSource), findsNothing);
-    expect(find.byKey(simpleTarget), isNotInCard);
+      expect(find.byKey(simpleSource), findsNothing);
+      expect(find.byKey(simpleTarget), isNotInCard);
 
-    await tester.pump(frameDuration);
+      await tester.pump(frameDuration);
 
-    // t=32ms for the journey. Surely they are still at it.
-    expect(find.byKey(simpleSource), findsNothing);
-    expect(find.byKey(simpleTarget), isNotInCard);
+      // t=32ms for the journey. Surely they are still at it.
+      expect(find.byKey(simpleSource), findsNothing);
+      expect(find.byKey(simpleTarget), isNotInCard);
 
-    await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
 
-    // t=1.033s for the journey. The journey has ended (it ends this frame, in
-    // fact). The sidekicks should be back now.
-    expect(find.byKey(simpleSource), isInCard);
-    expect(find.byKey(simpleTarget), isInCard);
+      // t=1.033s for the journey. The journey has ended (it ends this frame, in
+      // fact). The sidekicks should be back now.
+      expect(find.byKey(simpleSource), isInCard);
+      expect(find.byKey(simpleTarget), isInCard);
+    });
+
+    testWidgets('Animate to source', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SimpleExample()));
+
+      // the initial setup.
+      expect(find.byKey(simpleSource), isInCard);
+      expect(find.byKey(simpleTarget), isInCard);
+
+      await tester.tap(find.byKey(simpleTarget));
+      await tester.pump(); // the animation will start at the next frame.
+      await tester.pump(frameDuration);
+
+      // at this stage, the sidekick just gone on its journey, we are
+      // seeing them at t=16ms.
+
+      expect(find.byKey(simpleTarget), findsNothing);
+      expect(find.byKey(simpleSource), isNotInCard);
+
+      await tester.pump(frameDuration);
+
+      // t=32ms for the journey. Surely they are still at it.
+      expect(find.byKey(simpleTarget), findsNothing);
+      expect(find.byKey(simpleSource), isNotInCard);
+
+      await tester.pump(const Duration(seconds: 1));
+
+      // t=1.033s for the journey. The journey has ended (it ends this frame, in
+      // fact). The sidekicks should be back now.
+      expect(find.byKey(simpleTarget), isInCard);
+      expect(find.byKey(simpleSource), isInCard);
+    });
+
+    testWidgets('Same key, throws', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SimpleExample('tag', 'tag')));
+      await tester.tap(find.byKey(simpleSource));
+      await tester.pump(); // the animation will start at the next frame.
+      expect(tester.takeException(), isFlutterError);
+    });
+
+    testWidgets('Target grows mid-flight', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SimpleExample()));
+      final double initialHeight =
+          tester.getSize(find.byKey(simpleSource)).height;
+
+      await tester.tap(find.byKey(simpleSource));
+      await tester.pump(); // the animation will start at the next frame.
+      await tester.pump(frameDuration);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      double midflightHeight = tester.getSize(find.byKey(simpleTarget)).height;
+      expect(midflightHeight, greaterThan(initialHeight));
+      expect(midflightHeight, lessThan(150.0));
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      double finalHeight = tester.getSize(find.byKey(simpleTarget)).height;
+      expect(finalHeight, 150.0);
+    });
+
+    testWidgets('Source shrinks mid-flight', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SimpleExample()));
+      final double initialHeight =
+          tester.getSize(find.byKey(simpleTarget)).height;
+
+      await tester.tap(find.byKey(simpleTarget));
+      await tester.pump(); // the animation will start at the next frame.
+      await tester.pump(frameDuration);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      double midflightHeight = tester.getSize(find.byKey(simpleSource)).height;
+      expect(midflightHeight, lessThan(initialHeight));
+      expect(midflightHeight, greaterThan(100.0));
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      double finalHeight = tester.getSize(find.byKey(simpleSource)).height;
+      expect(finalHeight, 100.0);
+    });
+
+    testWidgets('Target scrolls mid-flight', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SimpleExample()));
+      final double initialTop = tester.getTopLeft(find.byKey(simpleSource)).dy;
+      expect(initialTop, 20.0);
+
+      await tester.tap(find.byKey(simpleSource));
+      await tester.pump(); // the animation will start at the next frame.
+      await tester.pump(frameDuration);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      double midflightTop = tester.getTopLeft(find.byKey(simpleTarget)).dy;
+      expect(midflightTop, greaterThan(initialTop));
+      expect(midflightTop, lessThan(430.0));
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      double finalTop = tester.getTopLeft(find.byKey(simpleTarget)).dy;
+      expect(finalTop, 430.0);
+    });
+
+    testWidgets('Source scrolls mid-flight', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SimpleExample()));
+      final double initialTop = tester.getTopLeft(find.byKey(simpleTarget)).dy;
+      expect(initialTop, 430.0);
+
+      await tester.tap(find.byKey(simpleTarget));
+      await tester.pump(); // the animation will start at the next frame.
+      await tester.pump(frameDuration);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      double midflightTop = tester.getTopLeft(find.byKey(simpleSource)).dy;
+      expect(midflightTop, lessThan(initialTop));
+      expect(midflightTop, greaterThan(20.0));
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      double finalTop = tester.getTopLeft(find.byKey(simpleSource)).dy;
+      expect(finalTop, 20.0);
+    });
   });
 
-  testWidgets('Sidekick animate to source', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: SimpleExample()));
+  group('SidekickTeamBuilder ', () {
+    testWidgets('lists are changed after moveAllToSource',
+        (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final List<String> logs = <String>[];
+      await tester
+          .pumpWidget(MaterialApp(home: SidekickTeamBuilderExample(key)));
 
-    // the initial setup.
-    expect(find.byKey(simpleSource), isInCard);
-    expect(find.byKey(simpleTarget), isInCard);
+      final SidekickTeamBuilderState<Item> state = key.currentState;
 
-    await tester.tap(find.byKey(simpleTarget));
-    await tester.pump(); // the animation will start at the next frame.
-    await tester.pump(frameDuration);
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
 
-    // at this stage, the sidekick just gone on its journey, we are
-    // seeing them at t=16ms.
+      state.moveAllToSource().then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1001));
 
-    expect(find.byKey(simpleTarget), findsNothing);
-    expect(find.byKey(simpleSource), isNotInCard);
+      expect(logs, <String>['complete']);
 
-    await tester.pump(frameDuration);
+      expect(
+        state.sourceList,
+        containsAllItemsInOrder([0, 1, 2, 3, 4, 5, 6, 7]),
+      );
+      expect(state.targetList.length, 0);
+    });
 
-    // t=32ms for the journey. Surely they are still at it.
-    expect(find.byKey(simpleTarget), findsNothing);
-    expect(find.byKey(simpleSource), isNotInCard);
+    testWidgets('lists are changed after moveAllToTarget',
+        (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final List<String> logs = <String>[];
+      await tester
+          .pumpWidget(MaterialApp(home: SidekickTeamBuilderExample(key)));
 
-    await tester.pump(const Duration(seconds: 1));
+      final SidekickTeamBuilderState<Item> state = key.currentState;
 
-    // t=1.033s for the journey. The journey has ended (it ends this frame, in
-    // fact). The sidekicks should be back now.
-    expect(find.byKey(simpleTarget), isInCard);
-    expect(find.byKey(simpleSource), isInCard);
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
+
+      state.moveAllToTarget().then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1001));
+
+      expect(logs, <String>['complete']);
+
+      expect(
+        state.targetList,
+        containsAllItemsInOrder([4, 5, 6, 7, 0, 1, 2, 3]),
+      );
+      expect(state.sourceList.length, 0);
+    });
   });
+}
 
-  testWidgets('Sidekicks with same key crash', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: SimpleExample('tag', 'tag')));
-    await tester.tap(find.byKey(simpleSource));
-    await tester.pump(); // the animation will start at the next frame.
-    expect(tester.takeException(), isFlutterError);
-  });
+Matcher containsAllItemsInOrder(List<int> expected) =>
+    new _ItemContainsInOrder(expected);
 
-  testWidgets('Target Sidekick grows mid-flight', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: SimpleExample()));
-    final double initialHeight =
-        tester.getSize(find.byKey(simpleSource)).height;
+class _ItemContainsInOrder extends Matcher {
+  _ItemContainsInOrder(this.ids);
+  final List<int> ids;
 
-    await tester.tap(find.byKey(simpleSource));
-    await tester.pump(); // the animation will start at the next frame.
-    await tester.pump(frameDuration);
-    await tester.pump(const Duration(milliseconds: 500));
+  @override
+  Description describe(Description description) =>
+      description.add('contains in order(').addDescriptionOf(ids).add(')');
 
-    double midflightHeight = tester.getSize(find.byKey(simpleTarget)).height;
-    expect(midflightHeight, greaterThan(initialHeight));
-    expect(midflightHeight, lessThan(150.0));
+  String _test(List<Item> item, Map matchState) {
+    var matcherIndex = 0;
+    for (var value in item) {
+      if (ids[matcherIndex] == value.index) matcherIndex++;
+      if (matcherIndex == item.length) return null;
+    }
+    return new StringDescription()
+        .add('did not find a value matching ')
+        .addDescriptionOf(ids[matcherIndex])
+        .add(' following expected prior values')
+        .toString();
+  }
 
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump();
-    double finalHeight = tester.getSize(find.byKey(simpleTarget)).height;
-    expect(finalHeight, 150.0);
-  });
+  @override
+  bool matches(item, Map matchState) => _test(item, matchState) == null;
 
-  testWidgets('Source Sidekick shrinks mid-flight',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: SimpleExample()));
-    final double initialHeight =
-        tester.getSize(find.byKey(simpleTarget)).height;
-
-    await tester.tap(find.byKey(simpleTarget));
-    await tester.pump(); // the animation will start at the next frame.
-    await tester.pump(frameDuration);
-    await tester.pump(const Duration(milliseconds: 500));
-
-    double midflightHeight = tester.getSize(find.byKey(simpleSource)).height;
-    expect(midflightHeight, lessThan(initialHeight));
-    expect(midflightHeight, greaterThan(100.0));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump();
-    double finalHeight = tester.getSize(find.byKey(simpleSource)).height;
-    expect(finalHeight, 100.0);
-  });
-
-  testWidgets('Target Sidekick scrolls mid-flight',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: SimpleExample()));
-    final double initialTop = tester.getTopLeft(find.byKey(simpleSource)).dy;
-    expect(initialTop, 20.0);
-
-    await tester.tap(find.byKey(simpleSource));
-    await tester.pump(); // the animation will start at the next frame.
-    await tester.pump(frameDuration);
-    await tester.pump(const Duration(milliseconds: 500));
-
-    double midflightTop = tester.getTopLeft(find.byKey(simpleTarget)).dy;
-    expect(midflightTop, greaterThan(initialTop));
-    expect(midflightTop, lessThan(430.0));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump();
-    double finalTop = tester.getTopLeft(find.byKey(simpleTarget)).dy;
-    expect(finalTop, 430.0);
-  });
-
-  testWidgets('Source Sidekick scrolls mid-flight',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: SimpleExample()));
-    final double initialTop = tester.getTopLeft(find.byKey(simpleTarget)).dy;
-    expect(initialTop, 430.0);
-
-    await tester.tap(find.byKey(simpleTarget));
-    await tester.pump(); // the animation will start at the next frame.
-    await tester.pump(frameDuration);
-    await tester.pump(const Duration(milliseconds: 500));
-
-    double midflightTop = tester.getTopLeft(find.byKey(simpleSource)).dy;
-    expect(midflightTop, lessThan(initialTop));
-    expect(midflightTop, greaterThan(20.0));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump();
-    double finalTop = tester.getTopLeft(find.byKey(simpleSource)).dy;
-    expect(finalTop, 20.0);
-  });
+  @override
+  Description describeMismatch(item, Description mismatchDescription,
+          Map matchState, bool verbose) =>
+      mismatchDescription.add(_test(item, matchState));
 }

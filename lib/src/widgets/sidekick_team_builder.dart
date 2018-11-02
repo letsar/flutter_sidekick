@@ -53,7 +53,8 @@ class SidekickTeamBuilder<T> extends StatefulWidget {
     this.initialSourceList,
     this.initialTargetList,
     this.animationDuration = const Duration(milliseconds: 300),
-  }) : assert(animationDuration != null);
+  })  : assert(animationDuration != null),
+        super(key: key);
 
   /// The builder used to create the containers.
   final SidekickTeamWidgetBuilder<T> builder;
@@ -130,9 +131,7 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
   }
 
   /// Moves all the widgets from a container to the other, respecting the given [direction].
-  ///
-  /// The optional [callback] is called when the animation completes.
-  void moveAll(SidekickFlightDirection direction, {VoidCallback callback}) {
+  Future<void> moveAll(SidekickFlightDirection direction) {
     assert(direction != null);
     if (!_allInFlight) {
       _allInFlight = true;
@@ -144,7 +143,7 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
         target.addAll(source);
       });
 
-      _sidekickController
+      return _sidekickController
           .move(
         context,
         direction,
@@ -156,16 +155,21 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
           source.clear();
         });
         _allInFlight = false;
-        callback?.call();
       });
+    } else {
+      return Future<void>.value(null);
     }
   }
 
+  /// Moves all the widgets from the target container to the source container.
+  Future<void> moveAllToSource() => moveAll(SidekickFlightDirection.toSource);
+
+  /// Moves all the widgets from the source container to the target container.
+  Future<void> moveAllToTarget() => moveAll(SidekickFlightDirection.toTarget);
+
   /// Moves the widget containing the specifed [message] from its position to its
   /// position in the other container.
-  ///
-  /// The optional [callback] is called when the animation completes.
-  void move(T message, {VoidCallback callback}) {
+  Future<void> move(T message) {
     final _SidekickMission<T> sourceMission =
         _getFirstMissionInList(_sourceList, message);
     final _SidekickMission<T> targetMission =
@@ -191,14 +195,15 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
       setState(() {
         target.add(mission);
       });
-      mission.controller
+      return mission.controller
           .move(context, direction, tags: [_getTag(mission)]).then((_) {
         setState(() {
           mission.endFlight(direction);
           source.remove(mission);
         });
-        callback?.call();
       });
+    } else {
+      return Future<void>.value(null);
     }
   }
 
