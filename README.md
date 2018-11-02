@@ -42,6 +42,7 @@ To link two sidekicks, the `targetTag` property of the one denoted as the **sour
 Then to animate sidekicks, you can use the `SidekickController` and one of the *move* function.
 
 The animation below can be created with the following code:
+
 ![Simple Overview](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/simple_overview.gif)
 
 ```dart
@@ -114,6 +115,7 @@ class _SimpleExampleState extends State<SimpleExample>
 ### SidekickTeamBuilder
 
 The `SidekickTeamBuilder` widget can be used to create complex layouts, where widgets from one container can be moved to another one, and you want the transition to be animated:
+
 ![Wrap Overview](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/wrap_overview.gif)
 
 ```dart
