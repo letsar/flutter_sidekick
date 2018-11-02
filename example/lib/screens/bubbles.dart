@@ -31,7 +31,7 @@ class BubblesExample extends StatelessWidget {
                       return builderDelegate.build(
                         context,
                         GestureDetector(
-                          onTap: () => SidekickTeamBuilder.of<String>(context)
+                          onTap: () => builderDelegate.state
                               .move(builderDelegate.message),
                           child: Bubble(
                             radius: 30.0,
@@ -66,63 +66,68 @@ class BubblesExample extends StatelessWidget {
                     }).toList(),
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    CircleButton(
-                      text: '>',
-                      onPressed: () => SidekickTeamBuilder.of<String>(context)
-                          .moveAll(SidekickFlightDirection.toSource),
-                    ),
-                    SizedBox(width: 60.0, height: 60.0),
-                    CircleButton(
-                      text: '<',
-                      onPressed: () => SidekickTeamBuilder.of<String>(context)
-                          .moveAll(SidekickFlightDirection.toTarget),
-                    ),
-                  ],
+                SizedBox(
+                  height: 100.0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      CircleButton(
+                        text: '>',
+                        onPressed: () => SidekickTeamBuilder.of<String>(context)
+                            .moveAll(SidekickFlightDirection.toSource),
+                      ),
+                      SizedBox(width: 60.0, height: 60.0),
+                      CircleButton(
+                        text: '<',
+                        onPressed: () => SidekickTeamBuilder.of<String>(context)
+                            .moveAll(SidekickFlightDirection.toTarget),
+                      ),
+                    ],
+                  ),
                 ),
-                Wrap(
-                  spacing: 4.0,
-                  runSpacing: 4.0,
-                  children: sourceBuilderDelegates.map((builderDelegate) {
-                    return builderDelegate.build(
-                      context,
-                      GestureDetector(
-                        onTap: () => SidekickTeamBuilder.of<String>(context)
-                            .move(builderDelegate.message),
-                        child: Bubble(
-                          radius: 50.0,
-                          fontSize: 20.0,
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Text(
-                              builderDelegate.message,
-                              textAlign: TextAlign.center,
+                Center(
+                  child: Wrap(
+                    spacing: 4.0,
+                    runSpacing: 4.0,
+                    children: sourceBuilderDelegates.map((builderDelegate) {
+                      return builderDelegate.build(
+                        context,
+                        GestureDetector(
+                          onTap: () => builderDelegate.state
+                              .move(builderDelegate.message),
+                          child: Bubble(
+                            radius: 50.0,
+                            fontSize: 20.0,
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Text(
+                                builderDelegate.message,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      animationBuilder: (animation) => CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOut,
-                          ),
-                      flightShuttleBuilder: (
-                        context,
-                        animation,
-                        type,
-                        from,
-                        to,
-                      ) =>
-                          buildShuttle(
-                            animation,
-                            builderDelegate.message,
-                          ),
-                    );
-                  }).toList(),
+                        animationBuilder: (animation) => CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeOut,
+                            ),
+                        flightShuttleBuilder: (
+                          context,
+                          animation,
+                          type,
+                          from,
+                          to,
+                        ) =>
+                            buildShuttle(
+                              animation,
+                              builderDelegate.message,
+                            ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),

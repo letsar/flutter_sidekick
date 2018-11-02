@@ -11,6 +11,7 @@ typedef SidekickFlightShuttleBuilder = Widget Function(
   BuildContext toSidekickContext,
 );
 
+/// Signature for transforming an animation into another.
 typedef SidekickAnimationBuilder = Animation<double> Function(
   Animation<double> animation,
 );
@@ -46,6 +47,34 @@ Rect _globalBoundingBoxFor(BuildContext context) {
       box.getTransformTo(null), Offset.zero & box.size);
 }
 
+/// A widget that marks its child as being a candidate for sidekick animations.
+///
+/// [Sidekick] animations are like [Hero] animations but within a route.
+///
+/// To label a widget as such a feature, wrap it in a [Sidekick] widget.
+/// Use a [SidekickController] to animate it.
+///
+/// /// ## Discussion
+///
+/// Sidekicks and the parent [Overlay] [Stack] must be axis-aligned for
+/// all this to work. The top left and bottom right coordinates of each animated
+/// Sidekick will be converted to global coordinates and then from there converted
+/// to that [Stack]'s coordinate space, and the entire Sidekick subtree will, for
+/// the duration of the animation, be lifted out of its original place, and
+/// positioned on that stack. If the [Sidekick] isn't axis aligned, this is going to
+/// fail in a rather ugly fashion. Don't rotate your sidekicks!
+///
+/// To make the animations look good, it's critical that the widget tree for the
+/// sidekick in both locations be essentially identical. The widget of the *target*
+/// is, by default, used to do the transition: when going from source to target,
+/// target's sidekick's widget is placed over source's sidekick's widget. If a
+/// [flightShuttleBuilder] is supplied, its output widget is shown during the
+/// flight transition instead.
+///
+/// By default, both source and target's sidekicks are hidden while the
+/// transitioning widget is animating in-flight.
+/// [placeholderBuilder] can be used to show a custom widget in their place
+/// instead once the transition has taken flight.
 class Sidekick extends StatefulWidget {
   const Sidekick({
     Key key,
@@ -105,6 +134,7 @@ class Sidekick extends StatefulWidget {
   /// left in place once the Sidekick shuttle has taken flight.
   final TransitionBuilder placeholderBuilder;
 
+  /// Optional override to specified the animation used while flying.
   final SidekickAnimationBuilder animationBuilder;
 
   // Returns a map of all of the sidekicks in context, indexed by sidekick tag.
@@ -140,7 +170,7 @@ class Sidekick extends StatefulWidget {
   }
 
   @override
-  _SidekickState createState() => new _SidekickState();
+  _SidekickState createState() => _SidekickState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -497,6 +527,10 @@ class SidekickController extends Animation<double> {
   // Indexed by the sidekick tag.
   final Map<Object, _SidekickFlight> _flights = <Object, _SidekickFlight>{};
 
+  /// Starts the transition animations for the given [direction].
+  ///
+  /// If [direction] is [SidekickFlightDirection.toTarget] calls [moveToTarget].
+  /// If [direction] is [SidekickFlightDirection.toSource] calls [moveToSource].
   TickerFuture move(
     BuildContext context,
     SidekickFlightDirection direction, {
@@ -510,6 +544,10 @@ class SidekickController extends Animation<double> {
     }
   }
 
+  /// Starts the transition animations that moves the [Sidekick]s with the
+  /// specified [tags] to their target.
+  ///
+  /// If [tags] is null, moves all the [Sidekick] to their target.
   TickerFuture moveToTarget(
     BuildContext context, {
     List<Object> tags,
@@ -526,6 +564,10 @@ class SidekickController extends Animation<double> {
     return _controller.forward();
   }
 
+  /// Starts the transition animations that moves [Sidekick]s to the ones
+  /// with the specified [tags].
+  ///
+  /// If [tags] is null, moves all the [Sidekick] to their source.
   TickerFuture moveToSource(
     BuildContext context, {
     List<Object> tags,

@@ -1,19 +1,22 @@
 import 'package:example/screens/bubbles.dart';
+import 'package:example/screens/simple.dart';
 import 'package:flutter/material.dart';
 import 'package:example/screens/wrap.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Sidekick Demo',
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new HomePage(),
+      home: HomePage(),
       routes: <String, WidgetBuilder>{
+        'simple': (context) =>
+            SimpleScaffold(title: 'Simple', child: SimpleExample()),
         'wrap': (context) =>
             SimpleScaffold(title: 'Wrap', child: WrapExample()),
         'bubbles': (context) =>
@@ -30,6 +33,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(title: Text('Sidekick Demo')),
       body: ListView(
         children: <Widget>[
+          HomeTile('Simple', Colors.red, 'simple'),
           HomeTile('Wrap', Colors.indigo, 'wrap'),
           HomeTile('Bubbles', Colors.green, 'bubbles'),
         ],
@@ -87,9 +91,9 @@ class SimpleScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(title),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
       ),
       body: child,
     );

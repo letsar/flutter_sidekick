@@ -18,12 +18,11 @@ class WrapExample extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               SizedBox(
                 height: 120.0,
                 child: Wrap(
-                  direction: Axis.vertical,
                   children: sourceBuilderDelegates
                       .map((builderDelegate) => builderDelegate.build(
                             context,
@@ -58,7 +57,6 @@ class WrapExample extends StatelessWidget {
               SizedBox(
                 height: 250.0,
                 child: Wrap(
-                  direction: Axis.vertical,
                   children: targetBuilderDelegates
                       .map((builderDelegate) => builderDelegate.build(
                             context,
