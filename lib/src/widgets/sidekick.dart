@@ -653,7 +653,7 @@ class SidekickController extends Animation<double> {
     BuildContext fromSidekickContext,
     BuildContext toSidekickContext,
   ) {
-    final Sidekick toSidekick = fromSidekickContext.widget;
+    final Sidekick toSidekick = toSidekickContext.widget;
     return toSidekick.child;
   };
 }
