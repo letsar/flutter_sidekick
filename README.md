@@ -5,6 +5,8 @@ Widgets for creating Hero-like animations between two widgets within the same sc
 [![Pub](https://img.shields.io/pub/v/flutter_sidekick.svg)](https://pub.dartlang.org/packages/flutter_sidekick)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QTT34M25RDNL6)
 
+![Logo](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/sidekick_logo_220x321.png)
+
 ![Overview](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/bubble_overview.gif)
 
 ## Features
