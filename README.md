@@ -5,9 +5,9 @@ Widgets for creating Hero-like animations between two widgets within the same sc
 [![Pub](https://img.shields.io/pub/v/flutter_sidekick.svg)](https://pub.dartlang.org/packages/flutter_sidekick)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QTT34M25RDNL6)
 
-![Logo](./doc/images/sidekick_logo_220x321.png)
+![Logo](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/sidekick_logo_220x321.png)
 
-![Overview](./doc/images/bubble_overview.gif)
+![Overview](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/bubble_overview.gif)
 
 ## Features
 
@@ -43,7 +43,7 @@ Then to animate sidekicks, you can use the `SidekickController` and one of the *
 
 The animation below can be created with the following code:
 
-![Simple Overview](./doc/images/simple_overview.gif)
+![Simple Overview](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/simple_overview.gif)
 
 ```dart
 import 'package:flutter/material.dart';
@@ -116,7 +116,7 @@ class _SimpleExampleState extends State<SimpleExample>
 
 The `SidekickTeamBuilder` widget can be used to create complex layouts, where widgets from one container can be moved to another one, and you want the transition to be animated:
 
-![Wrap Overview](./doc/images/wrap_overview.gif)
+![Wrap Overview](https://raw.githubusercontent.com/letsar/flutter_sidekick/master/doc/images/wrap_overview.gif)
 
 ```dart
 import 'package:example/widgets/utils.dart';
