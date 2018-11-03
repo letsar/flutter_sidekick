@@ -143,21 +143,24 @@ class SidekickTeamBuilderExample extends StatelessWidget {
                 }).toList(),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                FlatButton(
-                  child: const Text('alltosource'),
-                  onPressed: () => SidekickTeamBuilder.of<String>(context)
-                      .moveAll(SidekickFlightDirection.toSource),
-                ),
-                RaisedButton(
-                  child: const Text('alltotarget'),
-                  onPressed: () => SidekickTeamBuilder.of<String>(context)
-                      .moveAll(SidekickFlightDirection.toTarget),
-                ),
-              ],
+            SizedBox(
+              height: 50.0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  FlatButton(
+                    child: const Text('alltosource'),
+                    onPressed: () => SidekickTeamBuilder.of<String>(context)
+                        .moveAll(SidekickFlightDirection.toSource),
+                  ),
+                  RaisedButton(
+                    child: const Text('alltotarget'),
+                    onPressed: () => SidekickTeamBuilder.of<String>(context)
+                        .moveAll(SidekickFlightDirection.toTarget),
+                  ),
+                ],
+              ),
             ),
             Wrap(
               children: sourceBuilderDelegates.map((builderDelegate) {
@@ -206,7 +209,7 @@ class SidekickTeamBuilderExample extends StatelessWidget {
           width: Tween<double>(begin: 50.0, end: 30.0).evaluate(animation),
           height: Tween<double>(begin: 50.0, end: 30.0).evaluate(animation),
           child: Text(
-            message + animation.value.toStringAsFixed(2),
+            message,
           ),
         );
       },
@@ -415,6 +418,275 @@ void main() {
         containsAllItemsInOrder([4, 5, 6, 7, 0, 1, 2, 3]),
       );
       expect(state.sourceList.length, 0);
+    });
+
+    testWidgets('correct item is moved', (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final List<String> logs = <String>[];
+      final sourceList = List.generate(4, (i) => Item(i));
+      final targetList = List.generate(4, (i) => Item(i + 4));
+
+      await tester.pumpWidget(MaterialApp(
+          home: SidekickTeamBuilderExample(key, sourceList, targetList)));
+
+      final SidekickTeamBuilderState<Item> state = key.currentState;
+
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
+
+      state.move(sourceList[2]).then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1001));
+
+      expect(logs, <String>['complete']);
+
+      expect(
+        state.sourceList,
+        containsAllItemsInOrder([0, 1, 3]),
+      );
+      expect(
+        state.targetList,
+        containsAllItemsInOrder([4, 5, 6, 7, 2]),
+      );
+
+      state.move(sourceList[2]).then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1001));
+
+      expect(logs, <String>['complete', 'complete']);
+
+      expect(
+        state.sourceList,
+        containsAllItemsInOrder([0, 1, 3, 2]),
+      );
+      expect(
+        state.targetList,
+        containsAllItemsInOrder([4, 5, 6, 7]),
+      );
+    });
+
+    testWidgets('item is animated', (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final List<String> logs = <String>[];
+      final sourceList = List.generate(4, (i) => Item(i));
+      final targetList = List.generate(4, (i) => Item(i + 4));
+      final item = sourceList[2];
+
+      await tester.pumpWidget(MaterialApp(
+          home: SidekickTeamBuilderExample(key, sourceList, targetList)));
+
+      final SidekickTeamBuilderState<Item> state = key.currentState;
+
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
+      expect(find.text(item.message), findsOneWidget);
+
+      final double initialTop = tester.getTopLeft(find.text(item.message)).dy;
+      final double initialHeight =
+          tester.getSize(find.text(item.message)).height;
+      expect(initialTop, 200.0);
+      expect(initialHeight, 50.0);
+
+      state.move(sourceList[2]).then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final double midTop = tester.getTopLeft(find.text(item.message)).dy;
+      final double midHeight = tester.getSize(find.text(item.message)).height;
+      expect(midTop, closeTo(100.0, 0.1));
+      expect(midHeight, closeTo(40.0, 0.1));
+
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final double finalTop = tester.getTopLeft(find.text(item.message)).dy;
+      final double finalHeight = tester.getSize(find.text(item.message)).height;
+      expect(finalTop, 0.0);
+      expect(finalHeight, 30.0);
+
+      await tester.pump(const Duration(milliseconds: 1));
+
+      final double finalFrameTop =
+          tester.getTopLeft(find.text(item.message)).dy;
+      final double finalFrameHeight =
+          tester.getSize(find.text(item.message)).height;
+      expect(finalFrameTop, 0.0);
+      expect(finalFrameHeight, 30.0);
+
+      expect(logs, <String>['complete']);
+    });
+
+    testWidgets('items are animated to target', (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final List<String> logs = <String>[];
+      final sourceList = List.generate(4, (i) => Item(i));
+      final targetList = List.generate(4, (i) => Item(i + 4));
+
+      await tester.pumpWidget(MaterialApp(
+          home: SidekickTeamBuilderExample(key, sourceList, targetList)));
+
+      final SidekickTeamBuilderState<Item> state = key.currentState;
+
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
+
+      for (var item in sourceList) {
+        expect(find.text(item.message), findsOneWidget);
+
+        final double initialTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double initialHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(initialTop, 200.0);
+        expect(initialHeight, 50.0);
+      }
+
+      state.moveAllToTarget().then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      for (var item in sourceList) {
+        final double midTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double midHeight = tester.getSize(find.text(item.message)).height;
+        expect(midTop, closeTo(100.0, 0.1));
+        expect(midHeight, closeTo(40.0, 0.1));
+      }
+      await tester.pump(const Duration(milliseconds: 500));
+
+      for (var item in sourceList) {
+        final double finalTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double finalHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(finalTop, 0.0);
+        expect(finalHeight, 30.0);
+      }
+
+      await tester.pump(const Duration(milliseconds: 1));
+
+      for (var item in sourceList) {
+        final double finalFrameTop =
+            tester.getTopLeft(find.text(item.message)).dy;
+        final double finalFrameHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(finalFrameTop, 0.0);
+        expect(finalFrameHeight, 30.0);
+      }
+
+      expect(logs, <String>['complete']);
+    });
+
+    testWidgets('items are animated to source', (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final List<String> logs = <String>[];
+      final sourceList = List.generate(4, (i) => Item(i));
+      final targetList = List.generate(4, (i) => Item(i + 4));
+
+      await tester.pumpWidget(MaterialApp(
+          home: SidekickTeamBuilderExample(key, sourceList, targetList)));
+
+      final SidekickTeamBuilderState<Item> state = key.currentState;
+
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
+
+      for (var item in targetList) {
+        expect(find.text(item.message), findsOneWidget);
+
+        final double initialTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double initialHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(initialTop, 0.0);
+        expect(initialHeight, 30.0);
+      }
+
+      state.moveAllToSource().then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      for (var item in targetList) {
+        final double midTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double midHeight = tester.getSize(find.text(item.message)).height;
+        expect(midTop, closeTo(100.0, 0.1));
+        expect(midHeight, closeTo(40.0, 0.1));
+      }
+      await tester.pump(const Duration(milliseconds: 500));
+
+      for (var item in targetList) {
+        final double finalTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double finalHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(finalTop, 200.0);
+        expect(finalHeight, 50.0);
+      }
+
+      await tester.pump(const Duration(milliseconds: 1));
+
+      for (var item in targetList) {
+        final double finalFrameTop =
+            tester.getTopLeft(find.text(item.message)).dy;
+        final double finalFrameHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(finalFrameTop, 200.0);
+        expect(finalFrameHeight, 50.0);
+      }
+
+      expect(logs, <String>['complete']);
+    });
+    
+    testWidgets('items not moved do not animate', (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final List<String> logs = <String>[];
+      final sourceList = List.generate(4, (i) => Item(i));
+      final targetList = List.generate(4, (i) => Item(i + 4));
+
+      await tester.pumpWidget(MaterialApp(
+          home: SidekickTeamBuilderExample(key, sourceList, targetList)));
+
+      final SidekickTeamBuilderState<Item> state = key.currentState;
+
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
+
+      for (var item in sourceList) {
+        expect(find.text(item.message), findsOneWidget);
+
+        final double initialTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double initialHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(initialTop, 200.0);
+        expect(initialHeight, 50.0);
+      }
+
+      state.moveAllToSource().then((_) => logs.add('complete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      for (var item in sourceList) {
+        final double midTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double midHeight = tester.getSize(find.text(item.message)).height;
+        expect(midTop, 200.0);
+        expect(midHeight, 50.0);
+      }
+      await tester.pump(const Duration(milliseconds: 500));
+
+      for (var item in sourceList) {
+        final double finalTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double finalHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(finalTop, 200.0);
+        expect(finalHeight, 50.0);
+      }
+
+      await tester.pump(const Duration(milliseconds: 1));
+
+      for (var item in sourceList) {
+        final double finalFrameTop =
+            tester.getTopLeft(find.text(item.message)).dy;
+        final double finalFrameHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(finalFrameTop, 200.0);
+        expect(finalFrameHeight, 50.0);
+      }
+
+      expect(logs, <String>['complete']);
     });
   });
 }
