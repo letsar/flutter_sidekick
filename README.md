@@ -11,7 +11,8 @@ Widgets for creating Hero-like animations between two widgets within the same sc
 
 ## Features
 
-* Hero-Like animations.
+* Hero-like animations.
+* Allow you to specify a different animation for each Sidekick.
 * Widget to manage animations between children of two multi-child widgets.
 
 ## Getting started
