@@ -1,6 +1,6 @@
-import 'package:example/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sidekick/flutter_sidekick.dart';
+import '../widgets/utils.dart';
 
 class BubblesExample extends StatelessWidget {
   @override

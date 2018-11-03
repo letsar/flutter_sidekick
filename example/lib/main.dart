@@ -1,7 +1,7 @@
-import 'package:example/screens/bubbles.dart';
-import 'package:example/screens/simple.dart';
 import 'package:flutter/material.dart';
-import 'package:example/screens/wrap.dart';
+import 'screens/bubbles.dart';
+import 'screens/simple.dart';
+import 'screens/wrap.dart';
 
 void main() => runApp(MyApp());
 

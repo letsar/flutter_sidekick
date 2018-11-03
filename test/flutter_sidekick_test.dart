@@ -630,7 +630,7 @@ void main() {
 
       expect(logs, <String>['complete']);
     });
-    
+
     testWidgets('items not moved do not animate', (WidgetTester tester) async {
       final key = GlobalKey<SidekickTeamBuilderState<Item>>();
       final List<String> logs = <String>[];
