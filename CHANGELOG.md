@@ -1,5 +1,5 @@
 ## 0.1.2
-### Addded
+### Added
 * Add didUpdateWidget in SidekickTeamBuilder for rebuilding the lists when the widget changes.
 
 ## 0.1.1
