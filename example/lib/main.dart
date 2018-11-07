@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/bubbles.dart';
 import 'screens/simple.dart';
 import 'screens/wrap.dart';
+import 'screens/wrap_change.dart';
 
 void main() => runApp(MyApp());
 
@@ -21,6 +22,8 @@ class MyApp extends StatelessWidget {
             SimpleScaffold(title: 'Wrap', child: WrapExample()),
         'bubbles': (context) =>
             SimpleScaffold(title: 'Bubbles', child: BubblesExample()),
+        'wrap_change': (context) =>
+            SimpleScaffold(title: 'Wrap change', child: WrapChangeExample()),
       },
     );
   }
@@ -36,6 +39,7 @@ class HomePage extends StatelessWidget {
           HomeTile('Simple', Colors.red, 'simple'),
           HomeTile('Wrap', Colors.indigo, 'wrap'),
           HomeTile('Bubbles', Colors.green, 'bubbles'),
+          HomeTile('Wrap change', Colors.pink, 'wrap_change'),
         ],
       ),
     );

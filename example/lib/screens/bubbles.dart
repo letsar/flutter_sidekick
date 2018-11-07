@@ -5,8 +5,13 @@ import '../widgets/utils.dart';
 class BubblesExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // The SidekickTeamBuilder takes in charge the animations and
+    // the state management.
     return SidekickTeamBuilder<String>(
+      // We can set an optional animation duration (defaults to 300ms).
       animationDuration: Duration(milliseconds: 500),
+
+      // We can set a the initial list of the container denoted the 'source'.
       initialSourceList: <String>[
         'Log\nextension',
         'Goblet\nSquats',
@@ -16,6 +21,13 @@ class BubblesExample extends StatelessWidget {
         'Dumbell\nLunge',
         'Front\nSquats',
       ],
+
+      // We can also set a the initial list of the container denoted the 'target'.
+      initialTargetList: null,
+
+      // The builder let you build everything you want.
+      // The sourceBuilderDelegates and targetBuilderDelegates let you build
+      // your container final widgets.
       builder: (context, sourceBuilderDelegates, targetBuilderDelegates) {
         return Center(
           child: Padding(
@@ -27,10 +39,17 @@ class BubblesExample extends StatelessWidget {
                   child: Wrap(
                     spacing: 4.0,
                     runSpacing: 4.0,
+                    // For each target child, there is a targetBuilderDelegate.
                     children: targetBuilderDelegates.map((builderDelegate) {
+                      // We build the child using the build method of the delegate.
+                      // This is how the Sidekicks are added automatically.
                       return builderDelegate.build(
                         context,
                         GestureDetector(
+                          // We can use the builderDelegate.state property
+                          // to trigger the move.
+                          // The element to move is determined by the message.
+                          // So it should be unique.
                           onTap: () => builderDelegate.state
                               .move(builderDelegate.message),
                           child: Bubble(
@@ -47,6 +66,8 @@ class BubblesExample extends StatelessWidget {
                             ),
                           ),
                         ),
+                        // You can set all the properties you would set on
+                        // a Sidekick.
                         animationBuilder: (animation) => CurvedAnimation(
                               parent: animation,
                               curve: FlippedCurve(Curves.easeOut),
@@ -74,12 +95,20 @@ class BubblesExample extends StatelessWidget {
                     children: <Widget>[
                       CircleButton(
                         text: '>',
+                        // We have to get the nearest SidekickTeamBuilderState to
+                        // trigger a move.
+                        // Here we will move all the children for the target container,
+                        // to the source container.
                         onPressed: () => SidekickTeamBuilder.of<String>(context)
                             .moveAll(SidekickFlightDirection.toSource),
                       ),
                       SizedBox(width: 60.0, height: 60.0),
                       CircleButton(
                         text: '<',
+                        // We have to get the nearest SidekickTeamBuilderState to
+                        // trigger a move.
+                        // Here we will move all the children for the source container,
+                        // to the target container.
                         onPressed: () => SidekickTeamBuilder.of<String>(context)
                             .moveAll(SidekickFlightDirection.toTarget),
                       ),
@@ -90,10 +119,17 @@ class BubblesExample extends StatelessWidget {
                   child: Wrap(
                     spacing: 4.0,
                     runSpacing: 4.0,
+                    // For each source child, there is a sourceBuilderDelegate.
                     children: sourceBuilderDelegates.map((builderDelegate) {
+                      // We build the child using the build method of the delegate.
+                      // This is how the Sidekicks are added automatically.
                       return builderDelegate.build(
                         context,
                         GestureDetector(
+                          // We can use the builderDelegate.state property
+                          // to trigger the move.
+                          // The element to move is determined by the message.
+                          // So it should be unique.
                           onTap: () => builderDelegate.state
                               .move(builderDelegate.message),
                           child: Bubble(
@@ -110,6 +146,8 @@ class BubblesExample extends StatelessWidget {
                             ),
                           ),
                         ),
+                        // You can set all the properties you would set on
+                        // a Sidekick.
                         animationBuilder: (animation) => CurvedAnimation(
                               parent: animation,
                               curve: Curves.easeOut,

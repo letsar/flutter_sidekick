@@ -688,6 +688,49 @@ void main() {
 
       expect(logs, <String>['complete']);
     });
+
+    testWidgets('new lists rebuild', (WidgetTester tester) async {
+      final key = GlobalKey<SidekickTeamBuilderState<Item>>();
+      final sourceList = List.generate(4, (i) => Item(i));
+      final targetList = List.generate(4, (i) => Item(i + 4));
+
+      await tester.pumpWidget(MaterialApp(
+          home: SidekickTeamBuilderExample(key, sourceList, targetList)));
+
+      final SidekickTeamBuilderState<Item> state = key.currentState;
+
+      expect(state.sourceList, containsAllItemsInOrder([0, 1, 2, 3]));
+      expect(state.targetList, containsAllItemsInOrder([4, 5, 6, 7]));
+
+      for (var item in sourceList) {
+        expect(find.text(item.message), findsOneWidget);
+
+        final double initialTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double initialHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(initialTop, 200.0);
+        expect(initialHeight, 50.0);
+      }
+
+      final newSourceList = List.generate(2, (i) => Item(i));
+      final newTargetList = List.generate(2, (i) => Item(i + 2));
+
+      await tester.pumpWidget(MaterialApp(
+          home: SidekickTeamBuilderExample(key, newSourceList, newTargetList)));
+
+      expect(state.sourceList, containsAllItemsInOrder([0, 1]));
+      expect(state.targetList, containsAllItemsInOrder([2, 3]));
+
+      for (var item in newSourceList) {
+        expect(find.text(item.message), findsOneWidget);
+
+        final double initialTop = tester.getTopLeft(find.text(item.message)).dy;
+        final double initialHeight =
+            tester.getSize(find.text(item.message)).height;
+        expect(initialTop, 200.0);
+        expect(initialHeight, 50.0);
+      }
+    });
   });
 }
 

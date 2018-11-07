@@ -10,10 +10,19 @@ class Item {
 }
 
 class WrapExample extends StatelessWidget {
+  WrapExample({
+    this.sourceList,
+    this.targetList,
+  });
+
+  final List<Item> sourceList;
+  final List<Item> targetList;
+
   @override
   Widget build(BuildContext context) {
     return SidekickTeamBuilder<Item>(
-      initialSourceList: List.generate(20, (i) => Item(id: i)),
+      initialSourceList: sourceList ?? List.generate(20, (i) => Item(id: i)),
+      initialTargetList: targetList,
       builder: (context, sourceBuilderDelegates, targetBuilderDelegates) {
         return Padding(
           padding: const EdgeInsets.all(8.0),

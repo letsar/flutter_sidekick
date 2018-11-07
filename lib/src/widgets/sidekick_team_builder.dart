@@ -109,6 +109,12 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
       vsync: this,
       duration: widget.animationDuration,
     );
+    _initLists();
+  }
+
+  void _initLists() {
+    _sourceList?.forEach((mission) => mission.dispose());
+    _targetList?.forEach((mission) => mission.dispose());
     _sourceList = List<_SidekickMission<T>>();
     _targetList = List<_SidekickMission<T>>();
     _initList(_sourceList, widget.initialSourceList, _sourceListPrefix);
@@ -128,6 +134,11 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
         ));
       }
     }
+  }
+
+  void didUpdateWidget(covariant SidekickTeamBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _initLists();
   }
 
   /// Moves all the widgets from a container to the other, respecting the given [direction].
