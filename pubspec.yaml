@@ -1,6 +1,6 @@
 name: flutter_sidekick
 description: Widgets for creating Hero-like animations between two widgets within the same screen
-version: 0.1.2
+version: 0.1.3
 author: Romain Rastel <lets4r@gmail.com>
 homepage: https://github.com/letsar/flutter_sidekick
 
