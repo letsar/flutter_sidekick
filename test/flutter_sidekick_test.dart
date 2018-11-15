@@ -245,7 +245,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       // t=1.033s for the journey. The journey has ended (it ends this frame, in
-      // fact). The sidekicks should be back now.      
+      // fact). The sidekicks should be back now.
       expect(find.byKey(simpleTarget), isInCard);
     });
 
@@ -276,7 +276,7 @@ void main() {
 
       // t=1.033s for the journey. The journey has ended (it ends this frame, in
       // fact). The sidekicks should be back now.
-      expect(find.byKey(simpleSource), isInCard);      
+      expect(find.byKey(simpleSource), isInCard);
     });
 
     testWidgets('Same key, throws', (WidgetTester tester) async {
