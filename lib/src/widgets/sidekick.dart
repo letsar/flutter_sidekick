@@ -357,7 +357,6 @@ class _SidekickFlight {
       overlayEntry.remove();
       overlayEntry = null;
 
-      manifest.fromSidekick.endFlight();
       manifest.toSidekick.endFlight();
       onFlightEnded(this);
     }
