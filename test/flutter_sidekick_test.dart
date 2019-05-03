@@ -10,9 +10,11 @@ class SimpleExample extends StatefulWidget {
   SimpleExample([
     this.sourceTag = 'source',
     this.targetTag = 'target',
+    this.keepShowingSource = false,
   ]);
   final String sourceTag;
   final String targetTag;
+  final bool keepShowingSource;
 
   @override
   _SimpleExampleState createState() => _SimpleExampleState();
@@ -51,6 +53,7 @@ class _SimpleExampleState extends State<SimpleExample>
               child: Sidekick(
                 tag: widget.sourceTag,
                 targetTag: widget.targetTag,
+                keepShowingWidget: widget.keepShowingSource,
                 child: Container(
                   key: simpleSource,
                   color: Colors.blue,
@@ -246,6 +249,39 @@ void main() {
 
       // t=1.033s for the journey. The journey has ended (it ends this frame, in
       // fact). The sidekicks should be back now.
+      expect(find.byKey(simpleTarget), isInCard);
+    });
+
+    testWidgets('Animate to target with keepShowing source',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+          MaterialApp(home: SimpleExample('source', 'target', true)));
+
+      // the initial setup.
+      expect(find.byKey(simpleSource), isInCard);
+      expect(find.byKey(simpleTarget), isInCard);
+
+      await tester.tap(find.byKey(simpleSource));
+      await tester.pump(); // the animation will start at the next frame.
+      await tester.pump(frameDuration);
+
+      // at this stage, the sidekick just gone on its journey, we are
+      // seeing them at t=16ms.
+
+      expect(find.byKey(simpleSource), findsNothing);
+      expect(find.byKey(simpleTarget), isNotInCard);
+
+      await tester.pump(frameDuration);
+
+      // t=32ms for the journey. Surely they are still at it.
+      expect(find.byKey(simpleSource), findsNothing);
+      expect(find.byKey(simpleTarget), isNotInCard);
+
+      await tester.pump(const Duration(seconds: 1));
+
+      // t=1.033s for the journey. The journey has ended (it ends this frame, in
+      // fact). The sidekicks should be back now.
+      expect(find.byKey(simpleSource), isInCard);
       expect(find.byKey(simpleTarget), isInCard);
     });
 
