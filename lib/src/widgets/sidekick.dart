@@ -523,6 +523,11 @@ class SidekickController extends Animation<double> {
 
   @mustCallSuper
   void dispose() {
+    if (_controller?.status == AnimationStatus.forward) {
+      _controller.value = 1;
+    } else if (_controller?.status == AnimationStatus.reverse) {
+      _controller.value = 0;
+    }
     _controller?.dispose();
   }
 
