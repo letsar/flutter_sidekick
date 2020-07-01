@@ -84,6 +84,7 @@ class Sidekick extends StatefulWidget {
     this.flightShuttleBuilder,
     this.placeholderBuilder,
     SidekickAnimationBuilder animationBuilder,
+    this.keepShowingWidget,
     @required this.child,
   })  : assert(tag != null),
         assert(child != null),
@@ -136,6 +137,9 @@ class Sidekick extends StatefulWidget {
 
   /// Optional override to specified the animation used while flying.
   final SidekickAnimationBuilder animationBuilder;
+
+  /// Keep showing the source "from" widget after it has flown
+  final bool keepShowingWidget;
 
   // Returns a map of all of the sidekicks in context, indexed by sidekick tag.
   static Map<Object, _SidekickState> _allSidekicksFor(BuildContext context) {
@@ -221,16 +225,17 @@ class _SidekickState extends State<Sidekick> with TickerProviderStateMixin {
 
 /// Everything known about a sidekick flight that's to be started or diverted.
 class _SidekickFlightManifest {
-  _SidekickFlightManifest({
-    @required this.type,
-    @required this.overlay,
-    @required this.rect,
-    @required this.fromSidekick,
-    @required this.toSidekick,
-    @required this.createRectTween,
-    @required this.shuttleBuilder,
-    @required this.animationController,
-  }) : assert((type == SidekickFlightDirection.toTarget &&
+  _SidekickFlightManifest(
+      {@required this.type,
+      @required this.overlay,
+      @required this.rect,
+      @required this.fromSidekick,
+      @required this.toSidekick,
+      @required this.createRectTween,
+      @required this.shuttleBuilder,
+      @required this.animationController,
+      @required this.keepShowingFromWidget})
+      : assert((type == SidekickFlightDirection.toTarget &&
                 fromSidekick.widget.targetTag == toSidekick.widget.tag) ||
             (type == SidekickFlightDirection.toSource &&
                 toSidekick.widget.targetTag == fromSidekick.widget.tag));
@@ -243,6 +248,7 @@ class _SidekickFlightManifest {
   final CreateRectTween createRectTween;
   final SidekickFlightShuttleBuilder shuttleBuilder;
   final Animation<double> animationController;
+  final bool keepShowingFromWidget;
 
   Object get tag => fromSidekick.widget.tag;
 
@@ -357,6 +363,7 @@ class _SidekickFlight {
       overlayEntry.remove();
       overlayEntry = null;
 
+      manifest.keepShowingFromWidget ? manifest.fromSidekick.endFlight() : null;
       manifest.toSidekick.endFlight();
       onFlightEnded(this);
     }
@@ -612,19 +619,20 @@ class SidekickController extends Animation<double> {
                 fromSidekick.flightShuttleBuilder;
             final SidekickFlightShuttleBuilder toShuttleBuilder =
                 toSidekick.flightShuttleBuilder;
+            final bool keepShowingFromWidget = fromSidekick?.keepShowingWidget;
 
             final _SidekickFlightManifest manifest = _SidekickFlightManifest(
-              type: flightType,
-              overlay: Overlay.of(context),
-              rect: rect,
-              fromSidekick: sidekicks[tag],
-              toSidekick: sidekicks[targetTag],
-              createRectTween: createRectTween,
-              shuttleBuilder: toShuttleBuilder ??
-                  fromShuttleBuilder ??
-                  _defaultSidekickFlightShuttleBuilder,
-              animationController: _controller.view,
-            );
+                type: flightType,
+                overlay: Overlay.of(context),
+                rect: rect,
+                fromSidekick: sidekicks[tag],
+                toSidekick: sidekicks[targetTag],
+                createRectTween: createRectTween,
+                shuttleBuilder: toShuttleBuilder ??
+                    fromShuttleBuilder ??
+                    _defaultSidekickFlightShuttleBuilder,
+                animationController: _controller.view,
+                keepShowingFromWidget: keepShowingFromWidget ?? false);
 
             if (_flights[tag] != null) {
               _flights[tag].divert(manifest);
