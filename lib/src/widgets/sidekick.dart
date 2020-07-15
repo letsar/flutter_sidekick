@@ -39,12 +39,15 @@ enum SidekickFlightDirection {
   toSource,
 }
 
-// The bounding box for context in global coordinates.
-Rect _globalBoundingBoxFor(BuildContext context) {
+// The bounding box for context in ancestorContext coordinate system, or in the global
+// coordinate system when null.
+Rect _boundingBoxFor(BuildContext context, [BuildContext ancestorContext]) {
   final RenderBox box = context.findRenderObject();
   assert(box != null && box.hasSize);
   return MatrixUtils.transformRect(
-      box.getTransformTo(null), Offset.zero & box.size);
+      box.getTransformTo(ancestorContext?.findRenderObject()),
+      Offset.zero & box.size,
+  );
 }
 
 /// A widget that marks its child as being a candidate for sidekick animations.
@@ -316,8 +319,9 @@ class _SidekickFlight {
         } else if (toSidekickBox.hasSize) {
           // The toSidekick has been laid out. If it's no longer where the sidekick animation is
           // supposed to end up then recreate the sidekickRect tween.
+          final RenderBox overlayBox = manifest.overlay.context?.findRenderObject();
           final Offset toSidekickOrigin =
-              toSidekickBox.localToGlobal(Offset.zero);
+              toSidekickBox.localToGlobal(Offset.zero, ancestor: overlayBox);
           if (toSidekickOrigin != sidekickRectTween.end.topLeft) {
             final Rect sidekickRectEnd =
                 toSidekickOrigin & sidekickRectTween.end.size;
@@ -376,8 +380,8 @@ class _SidekickFlight {
     manifest.toSidekick.startFlight();
 
     sidekickRectTween = _doCreateRectTween(
-      _globalBoundingBoxFor(manifest.fromSidekick.context),
-      _globalBoundingBoxFor(manifest.toSidekick.context),
+      _boundingBoxFor(manifest.fromSidekick.context, manifest.overlay.context),
+      _boundingBoxFor(manifest.toSidekick.context, manifest.overlay.context),
     );
 
     overlayEntry = OverlayEntry(builder: _buildOverlay);
@@ -418,7 +422,7 @@ class _SidekickFlight {
         manifest.fromSidekick.endFlight();
         newManifest.toSidekick.startFlight();
         sidekickRectTween = _doCreateRectTween(sidekickRectTween.end,
-            _globalBoundingBoxFor(newManifest.toSidekick.context));
+            _boundingBoxFor(newManifest.toSidekick.context, newManifest.overlay.context));
       } else {
         // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
         sidekickRectTween =
@@ -430,7 +434,7 @@ class _SidekickFlight {
 
       sidekickRectTween = _doCreateRectTween(
           sidekickRectTween.evaluate(_proxyAnimation),
-          _globalBoundingBoxFor(newManifest.toSidekick.context));
+          _boundingBoxFor(newManifest.toSidekick.context, newManifest.overlay.context));
       shuttle = null;
 
       if (newManifest.type == SidekickFlightDirection.toSource)
@@ -519,6 +523,11 @@ class SidekickController extends Animation<double> {
 
   @mustCallSuper
   void dispose() {
+    if (_controller?.status == AnimationStatus.forward) {
+      _controller.value = 1;
+    } else if (_controller?.status == AnimationStatus.reverse) {
+      _controller.value = 0;
+    }
     _controller?.dispose();
   }
 
@@ -588,7 +597,7 @@ class SidekickController extends Animation<double> {
     SidekickFlightDirection flightType,
     List<Object> tags,
   ) {
-    final Rect rect = _globalBoundingBoxFor(context);
+    final Rect rect = _boundingBoxFor(context);
 
     final Map<Object, _SidekickState> sidekicks =
         Sidekick._allSidekicksFor(context);
