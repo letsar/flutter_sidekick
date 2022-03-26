@@ -14,7 +14,7 @@ class CircleButton extends StatelessWidget {
     return SizedBox(
       height: 60.0,
       width: 60.0,
-      child: RaisedButton(
+      child: MaterialButton(
         child: RotatedBox(quarterTurns: 1, child: Text(text)),
         color: Colors.blue,
         colorBrightness: Brightness.dark,

@@ -69,9 +69,9 @@ class BubblesExample extends StatelessWidget {
                         // You can set all the properties you would set on
                         // a Sidekick.
                         animationBuilder: (animation) => CurvedAnimation(
-                              parent: animation,
-                              curve: FlippedCurve(Curves.easeOut),
-                            ),
+                          parent: animation,
+                          curve: FlippedCurve(Curves.easeOut),
+                        ),
                         flightShuttleBuilder: (
                           context,
                           animation,
@@ -80,9 +80,9 @@ class BubblesExample extends StatelessWidget {
                           to,
                         ) =>
                             buildShuttle(
-                              animation,
-                              builderDelegate.message,
-                            ),
+                          animation,
+                          builderDelegate.message,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -149,9 +149,9 @@ class BubblesExample extends StatelessWidget {
                         // You can set all the properties you would set on
                         // a Sidekick.
                         animationBuilder: (animation) => CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOut,
-                            ),
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
                         flightShuttleBuilder: (
                           context,
                           animation,
@@ -160,9 +160,9 @@ class BubblesExample extends StatelessWidget {
                           to,
                         ) =>
                             buildShuttle(
-                              animation,
-                              builderDelegate.message,
-                            ),
+                          animation,
+                          builderDelegate.message,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -225,7 +225,7 @@ class Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     TextStyle textStyle =
-        theme.primaryTextTheme.subhead.copyWith(color: foregroundColor);
+        theme.primaryTextTheme.subtitle1.copyWith(color: foregroundColor);
     Color effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {

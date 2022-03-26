@@ -28,11 +28,11 @@ class _WrapChangeExampleState extends State<WrapChangeExample> {
         ),
         Row(
           children: <Widget>[
-            RaisedButton(
+            MaterialButton(
               onPressed: addSourceItem,
               child: Text('add source'),
             ),
-            RaisedButton(
+            MaterialButton(
               onPressed: addTargetItem,
               child: Text('add target'),
             ),

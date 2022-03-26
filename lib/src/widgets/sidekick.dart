@@ -489,6 +489,7 @@ class SidekickController extends Animation<double> {
   final CreateRectTween createRectTween;
 
   final AnimationController _controller;
+  bool _dispose = false;
 
   @override
   void addListener(VoidCallback listener) {
@@ -519,7 +520,10 @@ class SidekickController extends Animation<double> {
 
   @mustCallSuper
   void dispose() {
-    _controller?.dispose();
+    if (!_dispose) {
+      _dispose = true;
+      _controller?.dispose();
+    }
   }
 
   // All of the sidekicks that are currently in the overlay and in motion.

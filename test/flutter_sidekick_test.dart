@@ -136,9 +136,9 @@ class SidekickTeamBuilderExample extends StatelessWidget {
                       to,
                     ) =>
                         buildShuttle(
-                          animation,
-                          builderDelegate.message.message,
-                        ),
+                      animation,
+                      builderDelegate.message.message,
+                    ),
                   );
                 }).toList(),
               ),
@@ -149,12 +149,12 @@ class SidekickTeamBuilderExample extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  FlatButton(
+                  MaterialButton(
                     child: const Text('alltosource'),
                     onPressed: () => SidekickTeamBuilder.of<String>(context)
                         .moveAll(SidekickFlightDirection.toSource),
                   ),
-                  RaisedButton(
+                  MaterialButton(
                     child: const Text('alltotarget'),
                     onPressed: () => SidekickTeamBuilder.of<String>(context)
                         .moveAll(SidekickFlightDirection.toTarget),
@@ -186,9 +186,9 @@ class SidekickTeamBuilderExample extends StatelessWidget {
                     to,
                   ) =>
                       buildShuttle(
-                        animation,
-                        builderDelegate.message.message,
-                      ),
+                    animation,
+                    builderDelegate.message.message,
+                  ),
                 );
               }).toList(),
             ),

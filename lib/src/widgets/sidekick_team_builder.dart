@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_sidekick/src/widgets/sidekick.dart';
 
@@ -72,7 +74,7 @@ class SidekickTeamBuilder<T> extends StatefulWidget {
   static SidekickTeamBuilderState<T> of<T>(BuildContext context) {
     assert(context != null);
     final SidekickTeamBuilderState<T> result =
-        context.ancestorStateOfType(TypeMatcher<SidekickTeamBuilderState<T>>());
+        context.findAncestorStateOfType<SidekickTeamBuilderState<T>>();
     return result;
   }
 
@@ -91,8 +93,8 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
   int _id;
   bool _allInFlight;
   SidekickController _sidekickController;
-  List<_SidekickMission<T>> _sourceList;
-  List<_SidekickMission<T>> _targetList;
+  final _sourceList = <_SidekickMission<T>>[];
+  final _targetList = <_SidekickMission<T>>[];
 
   /// The items contained in the container labeled as the 'source'.
   List<T> get sourceList => _sourceList.map((item) => item.message).toList();
@@ -115,8 +117,6 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
   void _initLists() {
     _sourceList?.forEach((mission) => mission.dispose());
     _targetList?.forEach((mission) => mission.dispose());
-    _sourceList = List<_SidekickMission<T>>();
-    _targetList = List<_SidekickMission<T>>();
     _initList(_sourceList, widget.initialSourceList, _sourceListPrefix);
     _initList(_targetList, widget.initialTargetList, _targetListPrefix);
   }
